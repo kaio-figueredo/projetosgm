@@ -201,7 +201,7 @@
         </div>
 
         <div class="action-area text-center shadow-sm">
-            <h6 class="text-muted mb-4 fw-bold text-uppercase small" style="letter-spacing: 1px;">Ações de Gerenciamento</h6>
+            
             <div class="d-flex flex-wrap justify-content-center gap-3">
                 <a href="gestor_chamados.php" class="btn btn-action btn-primary-custom">
                     <i class="bi bi-list-task"></i> Gerenciar Chamados
