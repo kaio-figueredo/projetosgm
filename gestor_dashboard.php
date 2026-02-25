@@ -20,14 +20,14 @@
             font-family: 'Inter', 'Segoe UI', sans-serif;
         }
 
-        /* Topo Premium conforme as imagens anteriores */
+
         .navbar { 
             background: linear-gradient(135deg, #212529 0%, #343a40 100%) !important; 
             border-bottom: 3px solid var(--accent-blue);
             padding: 12px 0;
         }
 
-        /* Seção de Título */
+
         .page-header {
             padding: 40px 0 20px 0;
         }
@@ -38,7 +38,7 @@
             letter-spacing: -0.5px;
         }
 
-        /* --- NOVOS CARDS DE ESTATÍSTICA --- */
+
         .stat-card {
             background: #fff;
             border: 1px solid #e9ecef;
@@ -55,7 +55,7 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.05);
         }
 
-        /* Linha de acento lateral para cor sutil */
+
         .stat-accent {
             position: absolute;
             left: 0;
@@ -80,7 +80,7 @@
             margin-bottom: 15px;
         }
 
-        /* Cores suaves para os ícones */
+
         .bg-light-blue { background: rgba(13, 110, 253, 0.1); color: var(--accent-blue); }
         .bg-light-yellow { background: rgba(255, 193, 7, 0.1); color: var(--accent-yellow); }
         .bg-light-red { background: rgba(220, 53, 69, 0.1); color: var(--accent-red); }
@@ -101,7 +101,7 @@
             letter-spacing: 0.8px;
         }
 
-        /* --- BOTÕES DE AÇÃO --- */
+
         .action-area {
             background: #fff;
             border: 1px solid #e9ecef;
