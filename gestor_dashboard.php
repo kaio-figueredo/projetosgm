@@ -19,7 +19,7 @@
             background-color: var(--bg-body); 
             font-family: 'Inter', 'Segoe UI', sans-serif;
         }
-/
+
         .navbar { 
             background: linear-gradient(135deg, #212529 0%, #343a40 100%) !important; 
             border-bottom: 3px solid var(--accent-blue);
