@@ -19,25 +19,15 @@
             background-color: var(--bg-body); 
             font-family: 'Inter', 'Segoe UI', sans-serif;
         }
-
-
+/
         .navbar { 
             background: linear-gradient(135deg, #212529 0%, #343a40 100%) !important; 
             border-bottom: 3px solid var(--accent-blue);
             padding: 12px 0;
         }
 
-
-        .page-header {
-            padding: 40px 0 20px 0;
-        }
-
-        .page-title {
-            font-weight: 800;
-            color: var(--primary-dark);
-            letter-spacing: -0.5px;
-        }
-
+        .page-header { padding: 40px 0 20px 0; }
+        .page-title { font-weight: 800; color: var(--primary-dark); letter-spacing: -0.5px; }
 
         .stat-card {
             background: #fff;
@@ -54,7 +44,6 @@
             transform: translateY(-5px);
             box-shadow: 0 10px 25px rgba(0,0,0,0.05);
         }
-
 
         .stat-accent {
             position: absolute;
@@ -80,27 +69,12 @@
             margin-bottom: 15px;
         }
 
-
         .bg-light-blue { background: rgba(13, 110, 253, 0.1); color: var(--accent-blue); }
         .bg-light-yellow { background: rgba(255, 193, 7, 0.1); color: var(--accent-yellow); }
         .bg-light-red { background: rgba(220, 53, 69, 0.1); color: var(--accent-red); }
 
-        .stat-value {
-            font-size: 2.2rem;
-            font-weight: 800;
-            line-height: 1;
-            margin-bottom: 8px;
-            color: var(--primary-dark);
-        }
-
-        .stat-label {
-            color: #6c757d;
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-        }
-
+        .stat-value { font-size: 2.2rem; font-weight: 800; color: var(--primary-dark); margin-bottom: 8px; }
+        .stat-label { color: #6c757d; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; }
 
         .action-area {
             background: #fff;
@@ -118,29 +92,14 @@
             display: inline-flex;
             align-items: center;
             gap: 10px;
+            text-decoration: none;
         }
 
-        .btn-primary-custom {
-            background-color: var(--primary-dark);
-            color: white;
-            border: none;
-        }
+        .btn-primary-custom { background-color: var(--primary-dark); color: white; border: none; }
+        .btn-primary-custom:hover { background-color: #000; color: white; }
 
-        .btn-primary-custom:hover {
-            background-color: #000;
-            color: white;
-        }
-
-        .btn-outline-custom {
-            border: 2px solid var(--accent-blue);
-            color: var(--accent-blue);
-            background: transparent;
-        }
-
-        .btn-outline-custom:hover {
-            background: var(--accent-blue);
-            color: white;
-        }
+        .btn-outline-custom { border: 2px solid var(--accent-blue); color: var(--accent-blue); background: transparent; }
+        .btn-outline-custom:hover { background: var(--accent-blue); color: white; }
     </style>
 </head>
 <body>
@@ -152,7 +111,7 @@
             </a>
             <div class="d-flex align-items-center">
                 <span class="text-light me-3 small opacity-75">Olá, Admin Gestor</span>
-                <a href="api/logout.php" class="btn btn-sm btn-outline-danger rounded-pill px-3">
+                <a href="api/logout.php" onclick="return confirmarSair()" class="btn btn-sm btn-outline-danger rounded-pill px-3">
                     <i class="bi bi-box-arrow-right me-1"></i> Sair
                 </a>
             </div>
@@ -169,10 +128,8 @@
             <div class="col-md-4">
                 <div class="stat-card">
                     <div class="stat-accent accent-blue"></div>
-                    <div class="stat-icon bg-light-blue">
-                        <i class="bi bi-envelope-plus"></i>
-                    </div>
-                    <div class="stat-value">0</div>
+                    <div class="stat-icon bg-light-blue"><i class="bi bi-envelope-plus"></i></div>
+                    <div class="stat-value" id="countNovos">0</div>
                     <div class="stat-label">Novas Solicitações</div>
                 </div>
             </div>
@@ -180,10 +137,8 @@
             <div class="col-md-4">
                 <div class="stat-card">
                     <div class="stat-accent accent-yellow"></div>
-                    <div class="stat-icon bg-light-yellow">
-                        <i class="bi bi-tools"></i>
-                    </div>
-                    <div class="stat-value">0</div>
+                    <div class="stat-icon bg-light-yellow"><i class="bi bi-tools"></i></div>
+                    <div class="stat-value" id="countAndamento">0</div>
                     <div class="stat-label">Em Atendimento</div>
                 </div>
             </div>
@@ -191,17 +146,15 @@
             <div class="col-md-4">
                 <div class="stat-card">
                     <div class="stat-accent accent-red"></div>
-                    <div class="stat-icon bg-light-red">
-                        <i class="bi bi-exclamation-octagon"></i>
-                    </div>
-                    <div class="stat-value">0</div>
+                    <div class="stat-icon bg-light-red"><i class="bi bi-exclamation-octagon"></i></div>
+                    <div class="stat-value" id="countCriticos">0</div>
                     <div class="stat-label">Críticos / Urgentes</div>
                 </div>
             </div>
         </div>
 
         <div class="action-area text-center shadow-sm">
-            
+
             <div class="d-flex flex-wrap justify-content-center gap-3">
                 <a href="gestor_chamados.php" class="btn btn-action btn-primary-custom">
                     <i class="bi bi-list-task"></i> Gerenciar Chamados
@@ -213,6 +166,13 @@
         </div>
     </main>
 
+    <script>
+
+        function confirmarSair() {
+            return confirm("Tem certeza que deseja encerrar a sessão?");
+        }
+    </script>
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
