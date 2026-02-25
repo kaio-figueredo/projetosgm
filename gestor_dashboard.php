@@ -152,7 +152,7 @@
             </a>
             <div class="d-flex align-items-center">
                 <span class="text-light me-3 small opacity-75">Olá, Admin Gestor</span>
-                <a href="logout.php" class="btn btn-sm btn-outline-danger rounded-pill px-3">
+                <a href="api/logout.php" class="btn btn-sm btn-outline-danger rounded-pill px-3">
                     <i class="bi bi-box-arrow-right me-1"></i> Sair
                 </a>
             </div>
