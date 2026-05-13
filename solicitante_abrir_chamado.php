@@ -4,158 +4,325 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SGM - Nova Solicitação</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
     <style>
         :root {
-            /* Paleta de cores oficial do seu sistema */
-            --primary-dark: #212529;
-            --accent-blue: #0d6efd;
-            --bg-body: #f0f2f5;
+            --primary: #5d87ff; /* Azul da marca conforme imagens */
+            --bg-light: #f4f7fe;
+            --sidebar-width: 260px;
+            --text-main: #2a3547;
+            --text-muted: #7c8fac;
         }
 
-        body { 
-            background-color: var(--bg-body); 
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            color: #333;
+        body {
+            background-color: var(--bg-light);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            display: flex;
+            min-height: 100vh;
+            color: var(--text-main);
         }
 
-        /* Navbar com o gradiente dark que usamos nos outros */
-        .navbar { 
-            background: linear-gradient(135deg, #212529 0%, #343a40 100%) !important; 
-            border-bottom: 3px solid var(--accent-blue);
-            padding: 12px 0;
+        /* Sidebar - Alinhamento e Estilo */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: white;
+            border-right: 1px solid #e2e8f0;
+            padding: 2rem 1.2rem;
+            position: fixed;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
         }
 
-        /* Card centralizado simples */
-        .request-card {
-            background: #ffffff;
-            border: none;
-            border-radius: 12px;
-            padding: 35px;
-            margin-top: 40px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        .brand {
+            font-weight: 800;
+            color: var(--primary);
+            font-size: 1.3rem;
+            margin-bottom: 2.5rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-left: 10px;
         }
 
-        /* Títulos e Labels */
-        .card-title { color: var(--primary-dark); font-weight: 700; }
-        
-        .form-label {
+        .nav-link {
+            color: #5a6a85;
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 6px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
             font-weight: 600;
-            font-size: 0.85rem;
-            color: #495057;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            font-size: 0.95rem;
         }
 
-        /* Inputs consistentes com o Dashboard */
+        .nav-link:hover, .nav-link.active {
+            background: rgba(93, 135, 255, 0.1);
+            color: var(--primary);
+        }
+
+        /* Área Principal */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 2.5rem 4rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Centraliza o card horizontalmente */
+        }
+
+        .content-container {
+            width: 100%;
+            max-width: 850px;
+        }
+
+        .top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            width: 100%;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        /* Card de Formulário */
+        .modern-card {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+            border: 1px solid #f1f3f9;
+        }
+
+        .form-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 10px;
+        }
+
         .form-control, .form-select {
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            padding: 12px;
-            background-color: #f8f9fa;
+            border: 1.5px solid #dfe5ef;
+            background: #fff;
+            padding: 14px 18px;
+            border-radius: 12px;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            transition: all 0.2s;
         }
 
         .form-control:focus, .form-select:focus {
-            border-color: var(--accent-blue);
-            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1);
-            background-color: #fff;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(93, 135, 255, 0.1);
+            outline: none;
         }
 
-        /* Botão Principal */
-        .btn-enviar {
-            background-color: var(--accent-blue);
+        /* Área de Upload Estilizada */
+        .upload-area {
+            border: 2px dashed #cbd5e1;
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary);
+            background: rgba(93, 135, 255, 0.02);
+        }
+
+        .upload-icon {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            margin-bottom: 15px;
+            color: var(--primary);
+            font-size: 1.5rem;
+        }
+
+        .btn-submit {
+            background: var(--primary);
             border: none;
-            border-radius: 8px;
-            padding: 15px;
+            padding: 16px;
+            border-radius: 12px;
             font-weight: 700;
-            transition: all 0.3s ease;
+            color: white;
+            box-shadow: 0 8px 20px rgba(93, 135, 255, 0.25);
+            transition: all 0.3s;
+            margin-top: 15px;
         }
 
-        .btn-enviar:hover {
-            background-color: #0b5ed7;
-            transform: translateY(-1px);
-            box-shadow: 0 5px 10px rgba(13, 110, 253, 0.2);
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(93, 135, 255, 0.35);
+            filter: brightness(1.1);
         }
 
-        /* Área de upload simples */
-        .upload-section {
-            border: 2px dashed #dee2e6;
+        .btn-back {
+            background: transparent;
+            color: var(--text-muted);
+            border: none;
+            padding: 8px 15px;
             border-radius: 8px;
-            padding: 20px;
-            background: #fbfbfb;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.85rem;
+            transition: 0.2s;
+        }
+
+        .btn-back:hover {
+            background: #f1f5f9;
+            color: var(--text-main);
+        }
+
+        #file-name {
+            display: inline-block;
+            margin-top: 10px;
+            font-size: 0.85rem;
+            padding: 5px 12px;
+            background: #eef2ff;
+            border-radius: 20px;
+            color: var(--primary);
         }
     </style>
 </head>
 <body>
 
-    <nav class="navbar navbar-dark shadow-sm">
-        <div class="container">
-            <a class="navbar-brand d-flex align-items-center fw-bold" href="solicitante_dashboard.php">
-                <i class="bi bi-shield-check me-2 text-primary"></i> SGM Admin
+    <aside class="sidebar">
+        <div class="brand">
+            <i class="bi bi-shield-lock-fill"></i> SGM SOLICITANTE
+        </div>
+        <nav>
+            <a href="solicitante_dashboard.php" class="nav-link">
+                <i class="bi bi-grid-fill"></i> Dashboard
             </a>
-            <a href="solicitante_dashboard.php" class="btn btn-sm btn-outline-light rounded-pill px-3">
-                <i class="bi bi-arrow-left me-1"></i> Voltar
+            <a href="#" class="nav-link active">
+                <i class="bi bi-plus-circle-fill"></i> Nova Solicitação
+            </a>
+        </nav>
+        
+        <div class="mt-auto">
+            <a href="logout.php" class="nav-link text-danger">
+                <i class="bi bi-power"></i> Sair do Sistema
             </a>
         </div>
-    </nav>
+    </aside>
 
-    <div class="container pb-5">
-        <div class="row justify-content-center">
-            <div class="col-lg-6 col-md-8">
-                <div class="request-card">
-                    <div class="mb-4">
-                        <h4 class="card-title mb-1">Nova Solicitação</h4>
-                        <p class="text-muted small">Informe os detalhes para a equipe de manutenção.</p>
-                    </div>
+    <main class="main-content">
+        <div class="content-container">
+            <header class="top-header">
+                <div>
+                    <h2 class="fw-bold mb-1">Nova Solicitação 👋</h2>
+                    <p class="text-muted mb-0">Informe os detalhes para a equipe de manutenção.</p>
+                </div>
+                <div class="user-profile">
+                    <i class="bi bi-person-circle fs-5"></i>
+                    <span>Maria Solicitante</span>
+                </div>
+            </header>
 
-                    <form id="formChamado">
-                        <div class="row">
-                            <div class="col-md-12 mb-3">
-                                <label class="form-label">Bloco / Setor</label>
-                                <select id="selectBloco" class="form-select" required onchange="carregarAmbientes(this.value)">
-                                    <option value="">Selecione o bloco</option>
-                                </select>
-                            </div>
+            <div class="modern-card">
+                <div class="d-flex justify-content-between align-items-center mb-5">
+                    <h5 class="fw-bold m-0" style="color: #4a5568;">Informações do Chamado</h5>
+                    <a href="solicitante_dashboard.php" class="btn-back">
+                        <i class="bi bi-chevron-left me-1"></i> Voltar
+                    </a>
+                </div>
 
-                            <div class="col-md-12 mb-3">
-                                <label class="form-label">Ambiente / Sala</label>
-                                <select id="selectAmbiente" class="form-select" required>
-                                    <option value="">Selecione o local</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Categoria</label>
-                            <select id="selectTipo" class="form-select" required>
-                                <option value="">O que precisa de reparo?</option>
+                <form id="formChamado">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="form-label">Bloco / Setor</label>
+                            <select class="form-select" id="selectBloco" required>
+                                <option value="">Selecione o bloco</option>
                             </select>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Descrição do Problema</label>
-                            <textarea id="descricao" class="form-control" rows="4" required placeholder="Descreva aqui o que está acontecendo..."></textarea>
+                        <div class="col-md-6">
+                            <label class="form-label">Ambiente / Sala</label>
+                            <select class="form-select" id="selectAmbiente" required>
+                                <option value="">Selecione o local</option>
+                            </select>
                         </div>
 
-                        <div class="mb-4">
-                            <label class="form-label">Evidência (Opcional)</label>
-                            <div class="upload-section text-center">
-                                <i class="bi bi-camera text-muted fs-3 mb-2 d-block"></i>
-                                <input type="file" id="foto" class="form-control form-control-sm" accept="image/*">
+                        <div class="col-12">
+                            <label class="form-label">Categoria do Reparo</label>
+                            <select class="form-select" id="selectTipo" required>
+                                <option value="">Selecione o tipo de problema...</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">Descrição Detalhada</label>
+                            <textarea class="form-control" id="descricao" rows="4" 
+                                placeholder="Explique brevemente o que aconteceu para agilizar o suporte..." required></textarea>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">Evidência Visual (Foto)</label>
+                            <div class="upload-area" onclick="document.getElementById('foto').click()">
+                                <div class="upload-icon">
+                                    <i class="bi bi-camera"></i>
+                                </div>
+                                <h6 class="fw-bold mb-1">Anexar uma foto do problema</h6>
+                                <p class="text-muted small mb-0">Tamanho máximo: 5MB (PNG, JPG)</p>
+                                <input type="file" id="foto" class="d-none" accept="image/*">
+                                <div id="file-name" class="d-none"></div>
                             </div>
                         </div>
 
-                        <button type="submit" class="btn btn-primary btn-enviar w-100 shadow-sm">
-                            <i class="bi bi-send-fill me-2"></i> Confirmar e Enviar
-                        </button>
-                    </form>
-                </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn w-100 btn-submit">
+                                <i class="bi bi-send-fill me-2"></i> Enviar Solicitação
+                            </button>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
-    </div>
+    </main>
+
+    <script>
+        document.getElementById('foto').onchange = function() {
+            const fileNameDiv = document.getElementById('file-name');
+            if(this.files.length > 0) {
+                fileNameDiv.classList.remove('d-none');
+                fileNameDiv.innerHTML = '<i class="bi bi-image me-1"></i> ' + this.files[0].name;
+            } else {
+                fileNameDiv.classList.add('d-none');
+            }
+        };
+    </script>
 
     <script src="./assets/js/solicitante_abrir_chamado.js"></script>
-
 </body>
 </html>
