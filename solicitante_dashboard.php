@@ -199,7 +199,7 @@ $nomeUsuario = $_SESSION['user_nome'] ?? 'Usuário';
     <main class="main-content">
         <header class="top-header">
             <div>
-                <h2 class="fw-bold mb-0">Olá, <?= explode(' ', $nomeUsuario)[0] ?>! 👋</h2>
+                <h2 class="fw-bold mb-0">Olá, <?= explode(' ', $nomeUsuario)[0] ?>! </h2>
                 <p class="text-muted mb-0">Acompanhe o andamento dos seus chamados.</p>
             </div>
             

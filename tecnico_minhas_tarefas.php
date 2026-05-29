@@ -8,6 +8,34 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
+    <?php
+        session_start();
+        require_once 'config/database.php'; // Verifique se o caminho está correto
+
+        // Proteção
+        if (!isset($_SESSION['user_id'])) {
+            header("Location: login.php");
+            exit;
+        }
+
+        $id_tecnico = $_SESSION['user_id'];
+        $nome_tecnico = $_SESSION['user_nome'] ?? 'Técnico';
+
+        // Busca apenas os chamados atribuídos a este técnico
+        $sql = "SELECT c.*, a.nome as ambiente_nome, b.nome as bloco_nome 
+                FROM chamados c 
+                LEFT JOIN ambientes a ON c.id_ambiente = a.id_ambiente 
+                LEFT JOIN blocos b ON a.id_bloco = b.id_bloco 
+                WHERE c.id_tecnico = ? 
+                ORDER BY c.data_abertura DESC";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $id_tecnico);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $tarefas = $result->fetch_all(MYSQLI_ASSOC);
+        ?>
+    
     <style>
         :root {
             --bg-body: #f4f7fe;
@@ -170,7 +198,7 @@
 
 <main>
     <div class="dashboard-header">
-        <h2>Olá, João! 👋</h2>
+        <h2>Olá, João! </h2>
         <p class="text-muted">Aqui estão as manutenções atribuídas a você hoje.</p>
     </div>
 
@@ -196,29 +224,83 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td><strong>#1024</strong></td>
-                            <td>Ar Condicionado Central</td>
-                            <td>Ruído excessivo no motor</td>
-                            <td>13/05/2026</td>
-                            <td><span class="status-pill status-open">Aguardando</span></td>
-                            <td><button class="btn btn-sm btn-primary">Iniciar</button></td>
-                        </tr>
-                        <tr>
-                            <td><strong>#1025</strong></td>
-                            <td>Elevador Social B</td>
-                            <td>Troca de cabos de aço</td>
-                            <td>12/05/2026</td>
-                            <td><span class="status-pill status-progress">Em Andamento</span></td>
-                            <td><button class="btn btn-sm btn-outline-primary">Detalhes</button></td>
-                        </tr>
-                    </tbody>
+                            <?php if (empty($tarefas)): ?>
+                                <tr>
+                                    <td colspan="6" class="text-center py-4 text-muted">Nenhuma manutenção atribuída a você no momento.</td>
+                                </tr>
+                            <?php else: ?>
+                                <?php foreach ($tarefas as $t): ?>
+                                    <tr>
+                                        <td><strong>#<?= $t['id_chamado'] ?></strong></td>
+                                        <td><?= htmlspecialchars($t['bloco_nome'] . ' - ' . $t['ambiente_nome']) ?></td>
+                                        <td><?= htmlspecialchars($t['descricao_problema']) ?></td>
+                                        <td><?= date('d/m/Y', strtotime($t['data_abertura'])) ?></td>
+                                        
+                                        <td>
+                                            <?php 
+                                                // Cor da pílula baseada no status
+                                                $corStatus = 'status-open'; // azul padrão
+                                                if ($t['status'] === 'em_andamento') $corStatus = 'status-progress'; // amarelo
+                                                if ($t['status'] === 'concluido') $corStatus = 'bg-success text-white'; // verde
+                                            ?>
+                                            <span class="status-pill <?= $corStatus ?>">
+                                                <?= strtoupper(str_replace('_', ' ', $t['status'] ?? 'AGUARDANDO')) ?>
+                                            </span>
+                                        </td>
+                                        
+                                        <td>
+                                            <?php if ($t['status'] === 'aberto' || $t['status'] === 'aguardando'): ?>
+                                                <button class="btn btn-sm btn-primary" onclick="iniciarChamado(<?= $t['id_chamado'] ?>)">Iniciar</button>
+                                            <?php else: ?>
+                                                <button class="btn btn-sm btn-outline-primary" onclick="verDetalhes(<?= $t['id_chamado'] ?>)">Detalhes</button>
+                                            <?php endif; ?>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
                 </table>
             </div>
         </div>
     </div>
 </main>
+<script>
+    // Função para apenas abrir a página de detalhes
+    function verDetalhes(idChamado) {
+        window.location.href = `tecnico_detalhes.php?id=${idChamado}`;
+    }
 
+    // Função para mudar o status e depois abrir os detalhes
+    async function iniciarChamado(idChamado) {
+        if (confirm("Tem certeza que deseja iniciar o atendimento deste chamado?")) {
+            try {
+                const response = await fetch('api/atualizar_status.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    // Envia o ID e o novo status desejado
+                    body: JSON.stringify({ 
+                        id_chamado: idChamado, 
+                        status: 'em_andamento' 
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Se deu certo, redireciona o técnico para a página de detalhes daquele chamado
+                    window.location.href = `tecnico_detalhes.php?id=${idChamado}`;
+                } else {
+                    alert("Erro: " + result.message);
+                }
+            } catch (error) {
+                console.error("Erro na requisição:", error);
+                alert("Erro crítico ao tentar comunicar com o servidor.");
+            }
+        }
+    }
+</script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -5,27 +5,68 @@ $db   = "sgm_db";
 $user = "root";
 $pass = "";
 
+// Inicializa arrays para o gráfico com segurança
+$labelsGrafico = [];
+$dadosGrafico = [];
+
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8", $user, $pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    // Consultas para os contadores (Puxando do Banco de Dados)
-    $resNovos     = $pdo->query("SELECT COUNT(*) as total FROM chamados WHERE status = 'Pendente'")->fetch();
-    $resAndamento = $pdo->query("SELECT COUNT(*) as total FROM chamados WHERE status = 'Em Curso'")->fetch();
-    $resCriticos  = $pdo->query("SELECT COUNT(*) as total FROM chamados WHERE prioridade = 'Crítica'")->fetch();
-    
-    // Novos contadores: Blocos e Ambientes
-    // Certifique-se que essas tabelas existem no seu banco!
+    // Consultas para os contadores: Blocos, Ambientes e Usuários
     $resBlocos    = $pdo->query("SELECT COUNT(*) as total FROM blocos")->fetch();
     $resAmbientes = $pdo->query("SELECT COUNT(*) as total FROM ambientes")->fetch();
     $resUsuarios  = $pdo->query("SELECT COUNT(*) as total FROM usuarios")->fetch();
 
-    $totalGeral = $resNovos['total'] + $resAndamento['total'] + $resCriticos['total'];
+    // Consultas para os contadores: Status dos Chamados
+    // Obs: Confirme se no seu banco as palavras estão exatamente com essa grafia/acentuação.
+    $resRecusados  = $pdo->query("SELECT COUNT(*) as total FROM chamados WHERE status = 'Recusado'")->fetch();
+    $resAndamento  = $pdo->query("SELECT COUNT(*) as total FROM chamados WHERE status = 'Em andamento' OR status = 'Em Curso'")->fetch();
+    $resConcluidos = $pdo->query("SELECT COUNT(*) as total FROM chamados WHERE status = 'Concluído'")->fetch();
+
+    // ==========================================
+    // LÓGICA DO GRÁFICO (Últimos 7 dias)
+    // ==========================================
+    $ultimos7Dias = [];
+    // 1. Prepara os últimos 7 dias com valor 0 (para os dias que não tiveram nenhum chamado)
+    for ($i = 6; $i >= 0; $i--) {
+        $data = date('Y-m-d', strtotime("-$i days"));
+        $ultimos7Dias[$data] = 0; 
+    }
+
+    // 2. Busca no banco os chamados dos últimos 7 dias
+    $sqlGrafico = "SELECT DATE(data_abertura) as data_chamado, COUNT(*) as total 
+                   FROM chamados 
+                   WHERE data_abertura >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
+                   GROUP BY DATE(data_abertura)";
+    
+    $queryGrafico = $pdo->query($sqlGrafico);
+
+    // 3. Substitui os valores de 0 pelo total real encontrado no banco
+    while ($row = $queryGrafico->fetch(PDO::FETCH_ASSOC)) {
+        $data = $row['data_chamado'];
+        if (isset($ultimos7Dias[$data])) {
+            $ultimos7Dias[$data] = (int)$row['total'];
+        }
+    }
+
+    // 4. Formata os dias da semana para português e separa em duas listas (Labels e Valores)
+    $diasSemanaPT = ['Sun' => 'Dom', 'Mon' => 'Seg', 'Tue' => 'Ter', 'Wed' => 'Qua', 'Thu' => 'Qui', 'Fri' => 'Sex', 'Sat' => 'Sáb'];
+    
+    foreach ($ultimos7Dias as $data => $total) {
+        $diaIngles = date('D', strtotime($data));
+        // Cria a etiqueta como "Seg (12/05)"
+        $labelsGrafico[] = $diasSemanaPT[$diaIngles] . ' (' . date('d/m', strtotime($data)) . ')';
+        $dadosGrafico[] = $total;
+    }
 
 } catch (PDOException $e) {
     // Fallback caso o banco falhe ou as tabelas não existam ainda
-    $resNovos = $resAndamento = $resCriticos = $resBlocos = $resAmbientes = $resUsuarios = ['total' => 0];
-    $totalGeral = 0;
+    $resBlocos = $resAmbientes = $resUsuarios = $resRecusados = $resAndamento = $resConcluidos = ['total' => 0];
+    
+    // Gráfico de fallback vazio para não quebrar a tela
+    $labelsGrafico = ['Erro'];
+    $dadosGrafico = [0];
 }
 ?>
 
@@ -167,34 +208,7 @@ try {
     </div>
 
     <div class="row g-4 mb-5">
-        <div class="col-md-4">
-            <div class="card-stat">
-                <div class="icon-box bg-primary bg-opacity-10 text-primary"><i class="bi bi-plus-circle"></i></div>
-                <div>
-                    <p class="text-muted small mb-0">Pendentes</p>
-                    <h4 class="fw-bold mb-0"><?php echo $resNovos['total']; ?></h4>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card-stat">
-                <div class="icon-box bg-info bg-opacity-10 text-info"><i class="bi bi-play-circle"></i></div>
-                <div>
-                    <p class="text-muted small mb-0">Em Curso</p>
-                    <h4 class="fw-bold mb-0"><?php echo $resAndamento['total']; ?></h4>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card-stat">
-                <div class="icon-box bg-danger bg-opacity-10 text-danger"><i class="bi bi-exclamation-triangle"></i></div>
-                <div>
-                    <p class="text-muted small mb-0">Críticos</p>
-                    <h4 class="fw-bold mb-0"><?php echo $resCriticos['total']; ?></h4>
-                </div>
-            </div>
-        </div>
-
+        
         <div class="col-md-4">
             <div class="card-stat">
                 <div class="icon-box bg-dark bg-opacity-10 text-dark"><i class="bi bi-building"></i></div>
@@ -215,19 +229,48 @@ try {
         </div>
         <div class="col-md-4">
             <div class="card-stat">
-                <div class="icon-box bg-success bg-opacity-10 text-success"><i class="bi bi-person-check"></i></div>
+                <div class="icon-box bg-primary bg-opacity-10 text-primary"><i class="bi bi-people"></i></div>
                 <div>
                     <p class="text-muted small mb-0">Usuários Ativos</p>
                     <h4 class="fw-bold mb-0"><?php echo $resUsuarios['total']; ?></h4>
                 </div>
             </div>
         </div>
+
+        <div class="col-md-4">
+            <div class="card-stat">
+                <div class="icon-box bg-danger bg-opacity-10 text-danger"><i class="bi bi-x-octagon"></i></div>
+                <div>
+                    <p class="text-muted small mb-0">Recusados</p>
+                    <h4 class="fw-bold mb-0"><?php echo $resRecusados['total']; ?></h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card-stat">
+                <div class="icon-box bg-warning bg-opacity-10 text-warning"><i class="bi bi-hourglass-split"></i></div>
+                <div>
+                    <p class="text-muted small mb-0">Em Andamento</p>
+                    <h4 class="fw-bold mb-0"><?php echo $resAndamento['total']; ?></h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card-stat">
+                <div class="icon-box bg-success bg-opacity-10 text-success"><i class="bi bi-check2-circle"></i></div>
+                <div>
+                    <p class="text-muted small mb-0">Concluídos</p>
+                    <h4 class="fw-bold mb-0"><?php echo $resConcluidos['total']; ?></h4>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <div class="row g-4">
         <div class="col-lg-8">
             <div class="card p-4 border-0 rounded-4 shadow-sm">
-                <h5 class="fw-bold mb-4">Volume de Chamados</h5>
+                <h5 class="fw-bold mb-4">Volume de Chamados (Últimos 7 dias)</h5>
                 <canvas id="chartVol" height="120"></canvas>
             </div>
         </div>
@@ -252,14 +295,18 @@ try {
 </main>
 
 <script>
+    // Recupera os dados dinâmicos processados no PHP e converte para Javascript
+    const chartLabels = <?= json_encode($labelsGrafico) ?>;
+    const chartData = <?= json_encode($dadosGrafico) ?>;
+
     const ctx = document.getElementById('chartVol').getContext('2d');
     new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'],
+            labels: chartLabels, // Usa as datas dinâmicas do banco
             datasets: [{
                 label: 'Chamados Abertos',
-                data: [15, 22, 18, 25, 10, 5],
+                data: chartData, // Usa a quantidade real de chamados por dia
                 backgroundColor: '#6366f1',
                 borderRadius: 8
             }]
@@ -267,7 +314,13 @@ try {
         options: {
             plugins: { legend: { display: false } },
             scales: {
-                y: { grid: { display: false }, beginAtZero: true },
+                y: { 
+                    grid: { display: false }, 
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1 // Garante que a escala do gráfico mostre apenas números inteiros
+                    }
+                },
                 x: { grid: { display: false } }
             }
         }
