@@ -34,7 +34,7 @@ try {
 
         // 2. CADASTRO NO BANCO DE DADOS
         // Note: As colunas devem ser exatamente idênticas ao seu banco: nome, email, senha_hash, perfil, ativo
-        $sql = "INSERT INTO usuarios (nome, email, perfil, senha_hash, ativo) VALUES (?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO usuarios (nome, email, senha, tipo) VALUES (?, ?, ?, 'usuario')";
         $stmt = $pdo->prepare($sql);
         
         if ($stmt->execute([$nome, $email, $perfil, $senha, $ativo])) {

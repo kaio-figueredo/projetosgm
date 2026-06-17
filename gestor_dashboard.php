@@ -19,7 +19,6 @@ try {
     $resUsuarios  = $pdo->query("SELECT COUNT(*) as total FROM usuarios")->fetch();
 
     // Consultas para os contadores: Status dos Chamados
-    // Obs: Confirme se no seu banco as palavras estão exatamente com essa grafia/acentuação.
     $resRecusados  = $pdo->query("SELECT COUNT(*) as total FROM chamados WHERE status = 'Recusado'")->fetch();
     $resAndamento  = $pdo->query("SELECT COUNT(*) as total FROM chamados WHERE status = 'Em andamento' OR status = 'Em Curso'")->fetch();
     $resConcluidos = $pdo->query("SELECT COUNT(*) as total FROM chamados WHERE status = 'Concluído'")->fetch();
@@ -28,13 +27,11 @@ try {
     // LÓGICA DO GRÁFICO (Últimos 7 dias)
     // ==========================================
     $ultimos7Dias = [];
-    // 1. Prepara os últimos 7 dias com valor 0 (para os dias que não tiveram nenhum chamado)
     for ($i = 6; $i >= 0; $i--) {
         $data = date('Y-m-d', strtotime("-$i days"));
         $ultimos7Dias[$data] = 0; 
     }
 
-    // 2. Busca no banco os chamados dos últimos 7 dias
     $sqlGrafico = "SELECT DATE(data_abertura) as data_chamado, COUNT(*) as total 
                    FROM chamados 
                    WHERE data_abertura >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
@@ -42,7 +39,6 @@ try {
     
     $queryGrafico = $pdo->query($sqlGrafico);
 
-    // 3. Substitui os valores de 0 pelo total real encontrado no banco
     while ($row = $queryGrafico->fetch(PDO::FETCH_ASSOC)) {
         $data = $row['data_chamado'];
         if (isset($ultimos7Dias[$data])) {
@@ -50,21 +46,16 @@ try {
         }
     }
 
-    // 4. Formata os dias da semana para português e separa em duas listas (Labels e Valores)
     $diasSemanaPT = ['Sun' => 'Dom', 'Mon' => 'Seg', 'Tue' => 'Ter', 'Wed' => 'Qua', 'Thu' => 'Qui', 'Fri' => 'Sex', 'Sat' => 'Sáb'];
     
     foreach ($ultimos7Dias as $data => $total) {
         $diaIngles = date('D', strtotime($data));
-        // Cria a etiqueta como "Seg (12/05)"
         $labelsGrafico[] = $diasSemanaPT[$diaIngles] . ' (' . date('d/m', strtotime($data)) . ')';
         $dadosGrafico[] = $total;
     }
 
 } catch (PDOException $e) {
-    // Fallback caso o banco falhe ou as tabelas não existam ainda
     $resBlocos = $resAmbientes = $resUsuarios = $resRecusados = $resAndamento = $resConcluidos = ['total' => 0];
-    
-    // Gráfico de fallback vazio para não quebrar a tela
     $labelsGrafico = ['Erro'];
     $dadosGrafico = [0];
 }
@@ -86,15 +77,17 @@ try {
             --primary-purple: #6366f1;
             --bg-light: #f4f7fe;
             --sidebar-width: 260px;
+            --text-dark: #2b3674;
         }
 
         body {
             background-color: var(--bg-light);
             font-family: 'Plus Jakarta Sans', sans-serif;
             display: flex;
+            color: var(--text-dark);
         }
 
-        /* Sidebar Moderna */
+        /* Sidebar - Padronizada e Idêntica */
         .sidebar {
             width: var(--sidebar-width);
             background: white;
@@ -104,12 +97,32 @@ try {
             padding: 25px;
             display: flex;
             flex-direction: column;
+            z-index: 1000;
         }
 
         .main-content {
             margin-left: var(--sidebar-width);
             width: calc(100% - var(--sidebar-width));
             padding: 40px;
+        }
+
+        /* Links da Sidebar */
+        .nav-link {
+            color: #A3AED0;
+            font-weight: 600;
+            padding: 12px 15px;
+            border-radius: 12px;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: 0.3s;
+            text-decoration: none;
+        }
+
+        .nav-link.active, .nav-link:hover {
+            background: var(--bg-light);
+            color: var(--primary-purple);
         }
 
         /* Cards de Dados */
@@ -137,25 +150,6 @@ try {
             font-size: 1.2rem;
         }
 
-        /* Links da Sidebar */
-        .nav-link {
-            color: #A3AED0;
-            font-weight: 500;
-            padding: 12px 15px;
-            border-radius: 12px;
-            margin-bottom: 5px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .nav-link.active, .nav-link:hover {
-            background: var(--bg-light);
-            color: var(--primary-purple);
-        }
-
-        .nav-link i { font-size: 1.2rem; }
-
         .btn-action {
             background: white;
             border: 1px solid #e9ecef;
@@ -178,18 +172,23 @@ try {
 <body>
 
 <aside class="sidebar">
-    <h4 class="fw-bold mb-5 text-primary"><i class="bi bi-shield-lock-fill me-2"></i>SGM Gestão</h4>
+    <h4 class="fw-bold mb-4 text-primary"><i class="bi bi-shield-lock-fill me-2"></i>SGM Gestão</h4>
     
     <div class="nav flex-column flex-grow-1">
         <a href="dashboard.php" class="nav-link active"><i class="bi bi-house-door"></i> Dashboard</a>
         <a href="gestor_chamados.php" class="nav-link"><i class="bi bi-ticket-perforated"></i> Chamados</a>
         <a href="gestor_blocos.php" class="nav-link"><i class="bi bi-building"></i> Blocos</a>
         <a href="gestor_ambientes.php" class="nav-link"><i class="bi bi-geo-alt"></i> Ambientes</a>
-        <a href="gestor_usuarios.php" class="nav-link"><i class="bi bi-people"></i> Usuários</a>
         <a href="gestor_servicos.php" class="nav-link"><i class="bi bi-cpu"></i> Serviços</a>
+        
+        <hr class="text-secondary my-3 opacity-25">
+        <small class="text-muted fw-bold mb-2 px-3" style="font-size: 0.7rem; letter-spacing: 1px;">GESTÃO DE PESSOAS</small>
+        
+        <a href="add_usuario.php" class="nav-link"><i class="bi bi-person-plus"></i> Add Usuário</a>
+        <a href="add_tecnico.php" class="nav-link"><i class="bi bi-person-gear"></i> Add Técnico</a>
     </div>
 
-    <a href="logout.php" class="nav-link text-danger mt-auto"><i class="bi bi-box-arrow-right"></i> Sair</a>
+    <a href="#" onclick="confirmarSair()" class="nav-link text-danger mt-4"><i class="bi bi-box-arrow-right"></i> Sair</a>
 </aside>
 
 <main class="main-content">
@@ -208,7 +207,6 @@ try {
     </div>
 
     <div class="row g-4 mb-5">
-        
         <div class="col-md-4">
             <div class="card-stat">
                 <div class="icon-box bg-dark bg-opacity-10 text-dark"><i class="bi bi-building"></i></div>
@@ -264,7 +262,6 @@ try {
                 </div>
             </div>
         </div>
-
     </div>
 
     <div class="row g-4">
@@ -275,18 +272,18 @@ try {
             </div>
         </div>
         <div class="col-lg-4">
-            <h5 class="fw-bold mb-3">Gestão de Ambientes</h5>
+            <h5 class="fw-bold mb-3">Gestão Rápida</h5>
             <div class="d-flex flex-column gap-3">
-                <a href="gestor_blocos.php" class="btn-action d-flex align-items-center justify-content-between">
-                    <span><i class="bi bi-building me-2"></i> Gerenciar Blocos</span>
+                <a href="add_usuario.php" class="btn-action d-flex align-items-center justify-content-between">
+                    <span><i class="bi bi-person-plus me-2"></i> Novo Usuário</span>
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+                <a href="add_gestor.php" class="btn-action d-flex align-items-center justify-content-between">
+                    <span><i class="bi bi-person-badge me-2"></i> Novo Gestor</span>
                     <i class="bi bi-arrow-right"></i>
                 </a>
                 <a href="gestor_ambientes.php" class="btn-action d-flex align-items-center justify-content-between">
-                    <span><i class="bi bi-geo-alt me-2"></i> Configurar Ambientes</span>
-                    <i class="bi bi-arrow-right"></i>
-                </a>
-                <a href="gestor_servicos.php" class="btn-action d-flex align-items-center justify-content-between">
-                    <span><i class="bi bi-cpu me-2"></i> Serviços de TI</span>
+                    <span><i class="bi bi-geo-alt me-2"></i> Ambientes</span>
                     <i class="bi bi-arrow-right"></i>
                 </a>
             </div>
@@ -295,7 +292,6 @@ try {
 </main>
 
 <script>
-    // Recupera os dados dinâmicos processados no PHP e converte para Javascript
     const chartLabels = <?= json_encode($labelsGrafico) ?>;
     const chartData = <?= json_encode($dadosGrafico) ?>;
 
@@ -303,10 +299,10 @@ try {
     new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: chartLabels, // Usa as datas dinâmicas do banco
+            labels: chartLabels,
             datasets: [{
                 label: 'Chamados Abertos',
-                data: chartData, // Usa a quantidade real de chamados por dia
+                data: chartData,
                 backgroundColor: '#6366f1',
                 borderRadius: 8
             }]
@@ -317,14 +313,16 @@ try {
                 y: { 
                     grid: { display: false }, 
                     beginAtZero: true,
-                    ticks: {
-                        stepSize: 1 // Garante que a escala do gráfico mostre apenas números inteiros
-                    }
+                    ticks: { stepSize: 1 }
                 },
                 x: { grid: { display: false } }
             }
         }
     });
+
+    function confirmarSair() {
+        if (confirm("Deseja realmente sair?")) window.location.href = "logout.php";
+    }
 </script>
 
 </body>
