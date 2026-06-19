@@ -135,13 +135,13 @@
     <div class="nav flex-column flex-grow-1">
         <a href="dashboard.php" class="nav-link"><i class="bi bi-house-door"></i> Dashboard</a>
         <a href="gestor_chamados.php" class="nav-link"><i class="bi bi-ticket-perforated"></i> Chamados</a>
-        <a href="gestor_blocos.php" class="nav-link"><i class="bi bi-building"></i> Blocos</a>
+        <a href="gestor_blocos.php" class="nav-link active"><i class="bi bi-building"></i> Blocos</a>
         <a href="gestor_ambientes.php" class="nav-link"><i class="bi bi-geo-alt"></i> Ambientes</a>
         <a href="gestor_servicos.php" class="nav-link"><i class="bi bi-cpu"></i> Serviços</a>
         <hr class="text-secondary my-3 opacity-25">
         <small class="text-muted fw-bold mb-2 px-3" style="font-size: 0.7rem; letter-spacing: 1px;">GESTÃO DE PESSOAS</small>
 
-        <a href="add_usuario.php" class="nav-link active"><i class="bi bi-person-plus"></i> Add Usuário</a>
+        <a href="add_usuario.php" class="nav-link "><i class="bi bi-person-plus"></i> Add Usuário</a>
         <a href="add_tecnico.php" class="nav-link"><i class="bi bi-person-gear"></i> Add Técnico</a>
     </div>
     <a href="logout.php" class="nav-link text-danger mt-4"><i class="bi bi-box-arrow-right"></i> Sair</a>
